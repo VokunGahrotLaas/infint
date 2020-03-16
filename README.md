@@ -2,7 +2,7 @@
 
 ## Desc
  C++ library for infinit integers.\
- __Vers:__ 1.4
+ __Vers:__ 1.3
 
 ## Auth
  * [Maxence MICHOT](https://github.com/VokunGahrotLaas)
