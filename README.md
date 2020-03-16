@@ -36,4 +36,5 @@
  * The same rules applies to the output of .to_Bstr()
  * added .full_div(divisor, remainder, quotient) that calculate the remander and the quotient in one execution
  * added consts InfInt::neg_one, InfInt::zero and InfInt::pos_one, the most useful is InfInt::zero wich is used very often, this alows one allocation for multiple uses
- * re-done operator*
+ * re-done operator* (faster algorithm)
+ * re-done operator/, operator% and full_div (faster algorithm)

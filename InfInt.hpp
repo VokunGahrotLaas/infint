@@ -1,100 +1,106 @@
-// C++ libs
+#ifndef INFINT_HPP
+#define INFINT_HPP
+
+ // C++ libs
 #include <iostream> // std::ostream and std::string
 #include <algorithm> // std::reverse() (reverse std::string, I was too lazy to do it myself...)
 #include <vector> // std::vector<bool> for memory friendly data
 
 class InfInt {
-	public:
-		// typedef //
-		typedef std::vector<bool>::size_type size_type; // usualy unsigned long long
-		// constructor //
-		// default
-		InfInt(void); // init to +0
-		// copy
-		InfInt(char other); // char
-		InfInt(const InfInt& other); // InfInt
-		InfInt(int other); // int
-		InfInt(unsigned int other); // unsigned int
-		InfInt(long other); // long
-		InfInt(unsigned long other); // unsigned long
-		InfInt(long long other); // long long
-		InfInt(unsigned long long other); // unsigned long long
-		InfInt(std::string other); // std::string
-		InfInt(std::string other, int base);
-		// destructor //
-		~InfInt(void); // empty
-		// const getter //
-		bool sign(void) const;
-		bool get(const size_type& pos) const;
-		size_type size(void) const;
-		// complements //
-		InfInt& ones_complement(void);
-		InfInt& twos_complement(void);
-		// casting //
-		std::string to_Bstr(void) const;
-		std::string to_Bstr(size_type str_size) const;
-		std::string to_str(int base) const;
-		template <class T> T to_int(void) const;
-		template <class T> T to_int_safe(void) const;
-		// ??? //
-		void full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) const;
-		// operator //
-		// equal
-		InfInt& operator=(const InfInt& other);
-		// cmp
-		bool operator==(const InfInt& other) const;
-		bool operator!=(const InfInt& other) const;
-		bool operator>(const InfInt& other) const;
-		bool operator<=(const InfInt& other) const;
-		bool operator<(const InfInt& other) const;
-		bool operator>=(const InfInt& other) const;
-		// unary
-		InfInt operator+(void) const;
-		InfInt operator-(void) const;
-		// add
-		InfInt operator+(const InfInt& other) const;
-		InfInt& operator+=(const InfInt& other);
-		InfInt& operator++(void);
-		InfInt operator++(int);
-		// sub
-		InfInt operator-(const InfInt& other) const;
-		InfInt& operator-=(const InfInt& other);
-		InfInt& operator--(void);
-		InfInt operator--(int);
-		// mul
-		InfInt operator*(const InfInt& other) const;
-		InfInt& operator*=(const InfInt& other);
-		// div
-		InfInt operator/(const InfInt& other) const;
-		InfInt& operator/=(const InfInt& other);
-		// mod
-		InfInt operator%(const InfInt& other) const;
-		InfInt& operator%=(const InfInt& other);
-		// bitwise
-		InfInt operator&(const InfInt& other) const;
-		InfInt& operator&=(const InfInt& other);
-		InfInt operator|(const InfInt& other) const;
-		InfInt& operator|=(const InfInt& other);
-		InfInt operator^(const InfInt& other) const;
-		InfInt& operator^=(const InfInt& other);
-		InfInt operator<<(size_type other) const;
-		InfInt& operator<<=(size_type other);
-		InfInt operator>>(size_type other) const;
-		InfInt& operator>>=(size_type other);
-	protected:
-		void clean(void);
-		// Attributes //
-		std::vector<bool> m_number;
-		bool m_sign;
-		char padding[sizeof(void*) - (sizeof(std::vector<bool>) + sizeof(bool)) % sizeof(void*)]; // usualy 7, alows the struct to be round when used un arrays
-		// Static Attributes //
-		static const InfInt neg_one;
-		static const InfInt zero;
-		static const InfInt pos_one;
+public:
+	// typedef //
+	typedef std::vector<bool>::size_type size_type; // usualy unsigned long long
+	// constructor //
+	// default
+	InfInt(void); // init to +0
+	// copy
+	InfInt(char other); // char
+	InfInt(const InfInt& other); // InfInt
+	InfInt(int other); // int
+	InfInt(unsigned int other); // unsigned int
+	InfInt(long other); // long
+	InfInt(unsigned long other); // unsigned long
+	InfInt(long long other); // long long
+	InfInt(unsigned long long other); // unsigned long long
+	InfInt(std::string other); // std::string
+	InfInt(std::string other, int base);
+	// destructor //
+	~InfInt(void); // empty
+	// const getter //
+	bool sign(void) const;
+	bool get(const size_type& pos) const;
+	size_type size(void) const;
+	// complements //
+	InfInt& ones_complement(void);
+	InfInt& twos_complement(void);
+	// casting //
+	std::string to_Bstr(void) const;
+	std::string to_Bstr(size_type str_size) const;
+	std::string to_str(int base) const;
+	template <class T> T to_int(void) const;
+	template <class T> T to_int_safe(void) const;
+	// ??? //
+	void full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) const;
+	// operator //
+	// equal
+	InfInt& operator=(const InfInt& other);
+	// cmp
+	bool operator==(const InfInt& other) const;
+	bool operator!=(const InfInt& other) const;
+	bool operator>(const InfInt& other) const;
+	bool operator<=(const InfInt& other) const;
+	bool operator<(const InfInt& other) const;
+	bool operator>=(const InfInt& other) const;
+	// unary
+	InfInt operator+(void) const;
+	InfInt operator-(void) const;
+	// add
+	InfInt operator+(const InfInt& other) const;
+	InfInt& operator+=(const InfInt& other);
+	InfInt& operator++(void);
+	InfInt operator++(int);
+	// sub
+	InfInt operator-(const InfInt& other) const;
+	InfInt& operator-=(const InfInt& other);
+	InfInt& operator--(void);
+	InfInt operator--(int);
+	// mul
+	InfInt operator*(const InfInt& other) const;
+	InfInt& operator*=(const InfInt& other);
+	// div
+	InfInt operator/(const InfInt& other) const;
+	InfInt& operator/=(const InfInt& other);
+	// mod
+	InfInt operator%(const InfInt& other) const;
+	InfInt& operator%=(const InfInt& other);
+	// bitwise
+	InfInt operator&(const InfInt& other) const;
+	InfInt& operator&=(const InfInt& other);
+	InfInt operator|(const InfInt& other) const;
+	InfInt& operator|=(const InfInt& other);
+	InfInt operator^(const InfInt& other) const;
+	InfInt& operator^=(const InfInt& other);
+	InfInt operator<<(size_type other) const;
+	InfInt& operator<<=(size_type other);
+	InfInt operator>>(size_type other) const;
+	InfInt& operator>>=(size_type other);
+	// pow
+	InfInt& pow(const InfInt& other);
+	static InfInt pow(const InfInt& int0, const InfInt& int1);
+protected:
+	void clean(void);
+	// Attributes //
+	std::vector<bool> m_number;
+	bool m_sign;
+	char padding[sizeof(void*) - (sizeof(std::vector<bool>) + sizeof(bool)) % sizeof(void*)]; // usualy 7, alows the struct to be round when used un arrays
+	// Static Attributes //
+	static const InfInt neg_one;
+	static const InfInt zero;
+	static const InfInt pos_one;
 };
 
-InfInt::InfInt(void):
-	m_number({false}),
+InfInt::InfInt(void) :
+	m_number({ false }),
 	m_sign(false)
 {
 	//
@@ -112,7 +118,8 @@ InfInt::InfInt(char other) {
 			m_number.push_back(static_cast<bool>(other & 1));
 			other >>= 1;
 		}
-	} else {
+	}
+	else {
 		if (other == -1) {
 			m_sign = true;
 			m_number.push_back(true);
@@ -128,7 +135,7 @@ InfInt::InfInt(char other) {
 	}
 }
 
-InfInt::InfInt(const InfInt& other):
+InfInt::InfInt(const InfInt& other) :
 	m_number(other.m_number),
 	m_sign(other.m_sign)
 {
@@ -147,7 +154,8 @@ InfInt::InfInt(int other) {
 			m_number.push_back(static_cast<bool>(other & 1));
 			other >>= 1;
 		}
-	} else {
+	}
+	else {
 		if (other == -1) {
 			m_sign = true;
 			m_number.push_back(true);
@@ -186,7 +194,8 @@ InfInt::InfInt(long other) {
 			m_number.push_back(static_cast<bool>(other & 1l));
 			other >>= 1l;
 		}
-	} else {
+	}
+	else {
 		if (other == -1l) {
 			m_sign = true;
 			m_number.push_back(true);
@@ -225,7 +234,8 @@ InfInt::InfInt(long long other) {
 			m_number.push_back(static_cast<bool>(other & 1ll));
 			other >>= 1ll;
 		}
-	} else {
+	}
+	else {
 		if (other == -1ll) {
 			m_sign = true;
 			m_number.push_back(true);
@@ -261,10 +271,12 @@ InfInt::InfInt(std::string other) {
 	if (other.front() == '-') {
 		m_sign = true;
 		other.assign(other, 1, other.size());
-	} else if (other.front() == '+') {
+	}
+	else if (other.front() == '+') {
 		m_sign = false;
 		other.assign(other, 1, other.size());
-	} else
+	}
+	else
 		m_sign = false;
 	m_number.reserve(other.size());
 	while (other.size() > 0) {
@@ -282,7 +294,7 @@ bool InfInt::sign(void) const {
 	return m_sign;
 }
 
-bool InfInt::get(const unsigned long long& pos) const {
+bool InfInt::get(const size_type& pos) const {
 	if (pos < size())
 		return m_number[pos];
 	else
@@ -364,7 +376,7 @@ std::string InfInt::to_str(int base) const {
 		temp.twos_complement();
 	InfInt remainder;
 	while (temp != InfInt::zero) {
-		temp.full_div(base, remainder, temp);
+		temp.full_div(base, temp, remainder);
 		if (remainder < 10)
 			str.push_back('0' + remainder.to_int<char>());
 		else if (remainder < 36)
@@ -403,14 +415,14 @@ T InfInt::to_int_safe(void) const {
 	return temp;
 }
 
-void InfInt::full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) const {
+void InfInt::full_div(const InfInt& other, InfInt& quotient, InfInt& remainder) const {
 	if (*this == InfInt::zero) {
 		remainder = InfInt::zero;
 		quotient = InfInt::zero;
 		return;
 	}
 	if (other == InfInt::zero) {
-		throw std::invalid_argument("void InfInt::full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) const: Cannot divide by 0");
+		throw std::invalid_argument("void InfInt::full_div(const InfInt& other, InfInt& quotient, InfInt& remainder) const: Cannot divide by 0");
 	}
 	if (other == InfInt::pos_one) {
 		remainder = InfInt::zero;
@@ -422,20 +434,40 @@ void InfInt::full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) 
 		quotient = -*this;
 		return;
 	}
-	InfInt q;
-	InfInt a = *this;
+	if (other.size() > this->size()) {
+		remainder = *this;
+		quotient = InfInt::zero;
+		return;
+	}
+
+	InfInt q(InfInt::zero);
+	InfInt a(*this);
 	if (a.sign())
 		a.twos_complement();
 	InfInt b(other);
 	if (b.sign())
 		b.twos_complement();
-	for (; a >= b; a -= b, q++);
-	if (sign() != other.sign()) {
-		a.twos_complement();
-		q.twos_complement();
+
+	size_type size_diff = a.size() - b.size();
+	InfInt mask = InfInt::pos_one << size_diff;
+	b <<= size_diff;
+	while (a > other || a == b) {
+		while (a < b) {
+			mask >>= 1;
+			b >>= 1;
+		}
+		a -= b;
+		q |= mask;
+		mask >>= b.size() - a.size();
+		b >>= b.size() - a.size();
 	}
+
 	remainder = a;
 	quotient = q;
+	if (sign() != other.sign()) {
+		remainder.twos_complement();
+		quotient.twos_complement();
+	}
 }
 
 InfInt& InfInt::operator=(const InfInt& other) {
@@ -476,7 +508,8 @@ bool InfInt::operator>(const InfInt& other) const {
 				return false;
 			return true;
 		}
-	} else
+	}
+	else
 		return get(0) != other.get(0) && get(0) != sign();
 	return false;
 }
@@ -502,7 +535,8 @@ bool InfInt::operator<(const InfInt& other) const {
 				return false;
 			return true;
 		}
-	} else
+	}
+	else
 		return get(0) != other.get(0) && other.get(0) != sign();
 	return false;
 }
@@ -557,7 +591,8 @@ InfInt InfInt::operator+(const InfInt& other) const {
 	}
 	if (sign() && !other.sign()) { // only other is positive
 		return other + *this;
-	} else { // both are negative
+	}
+	else { // both are negative
 		return -(-*this + -other);
 	}
 }
@@ -574,16 +609,16 @@ InfInt& InfInt::operator++(void) {
 
 InfInt InfInt::operator++(int) {
 	InfInt return_val(*this);
-	++*this;
+	++(*this);
 	return return_val;
 }
 
 InfInt InfInt::operator-(const InfInt& other) const {
-	return *this + -other;
+	return (*this) + (-other);
 }
 
 InfInt& InfInt::operator-=(const InfInt& other) {
-	*this = *this - other;
+	*this = (*this) - other;
 	return *this;
 }
 
@@ -594,13 +629,13 @@ InfInt& InfInt::operator--(void) {
 
 InfInt InfInt::operator--(int) {
 	InfInt return_val(*this);
-	--*this;
+	-- (*this);
 	return return_val;
 }
 
 InfInt InfInt::operator*(const InfInt& other) const {
 	if (other.size() < size())
-		return other * (*this)
+		return other * (*this);
 	InfInt temp;
 	InfInt a(*this);
 	if (a.sign())
@@ -608,16 +643,16 @@ InfInt InfInt::operator*(const InfInt& other) const {
 	InfInt b(other);
 	if (b.sign())
 		b.twos_complement();
-	for (size_type i = 0; i < size(); i++)
-		if (get(i))
-			temp += other << i;
+	for (size_type i = 0; i < a.size(); i++)
+		if (a.get(i))
+			temp += b << i;
 	if (sign() != other.sign())
 		temp.twos_complement();
 	return temp;
 }
 
 InfInt& InfInt::operator*=(const InfInt& other) {
-	*this = *this * other;
+	*this = (*this) * other;
 	return *this;
 }
 
@@ -629,7 +664,9 @@ InfInt InfInt::operator/(const InfInt& other) const {
 	if (other == InfInt::pos_one)
 		return *this;
 	if (other == InfInt::neg_one)
-		return -*this;
+		return -(*this);
+	if (other.size() > this->size())
+		return InfInt::zero;
 	InfInt q;
 	InfInt a(*this);
 	if (a.sign())
@@ -637,7 +674,21 @@ InfInt InfInt::operator/(const InfInt& other) const {
 	InfInt b(other);
 	if (b.sign())
 		b.twos_complement();
-	for (; a >= b; a -= b, q++);
+	
+	size_type size_diff = a.size() - b.size();
+	InfInt mask = InfInt::pos_one << size_diff;
+	b <<= size_diff;
+	while (a > other || a == b) {
+		while (a < b) {
+			mask >>= 1;
+			b >>= 1;
+		}
+		a -= b;
+		q |= mask;
+		mask >>= b.size() - a.size();
+		b >>= b.size() - a.size();
+	}
+
 	if (sign() != other.sign())
 		q.twos_complement();
 	return q;
@@ -657,13 +708,24 @@ InfInt InfInt::operator%(const InfInt& other) const {
 		return InfInt::zero;
 	if (other == InfInt::neg_one)
 		return InfInt::zero;
+	if (other.size() > this->size())
+		return *this;
 	InfInt a(*this);
 	if (a.sign())
 		a.twos_complement();
 	InfInt b(other);
 	if (b.sign())
 		b.twos_complement();
-	for (; a >= b; a -= b);
+
+	size_type size_diff = a.size() - b.size();
+	b <<= size_diff;
+	while (a > other || a == b) {
+		while (a < b)
+			b >>= 1;
+		a -= b;
+		b >>= b.size() - a.size();
+	}
+
 	if (sign() != other.sign())
 		a.twos_complement();
 	return a;
@@ -772,6 +834,31 @@ InfInt& InfInt::operator>>=(size_type other) {
 	return *this;
 }
 
+InfInt& InfInt::pow(const InfInt& other) {
+	if (other == 0) {
+		if (*this == 0)
+			throw std::exception("Division by zero");
+		*this = 1;
+		return *this;
+	}
+	if (other < 0) {
+		if (*this == 0)
+			throw std::exception("Division by zero");
+		*this = 0;
+		return *this;
+	}
+	InfInt tmp(*this);
+	InfInt i(other);
+	for (; i > 1; i--)
+		*this *= tmp;
+	return *this;
+}
+
+InfInt InfInt::pow(const InfInt& int0, const InfInt& int1) {
+	InfInt tmp(int0);
+	return tmp.pow(int1);
+}
+
 void InfInt::clean(void) {
 	while (size() > 1 && m_number.back() == m_sign)
 		m_number.pop_back();
@@ -795,3 +882,5 @@ std::ostream& operator<<(std::ostream& out, const InfInt& integer) {
 	out << integer.to_Bstr();
 	return out;
 }
+
+#endif /* INFINT_HPP */
