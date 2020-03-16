@@ -1,7 +1,7 @@
 # InfInt
 
 ## Desc
- Library for infinit integers.\
+ C++ library for infinit integers.\
  __Vers:__ 1.1
 
 ## Auth
