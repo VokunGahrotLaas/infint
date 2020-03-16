@@ -3,7 +3,7 @@
 #include <algorithm> // std::reverse() (reverse std::string, I was too lazy to do it myself...)
 #include <vector> // std::vector<bool> for memory friendly data
 
-class InfInf {
+class InfInt {
 	public:
 		// typedef //
 		typedef std::vector<bool>::size_type size_type; // usualy unsigned long long
@@ -599,6 +599,8 @@ InfInt InfInt::operator--(int) {
 }
 
 InfInt InfInt::operator*(const InfInt& other) const {
+	if (other.size() < size())
+		return other * (*this)
 	InfInt temp;
 	InfInt a(*this);
 	if (a.sign())
@@ -606,8 +608,9 @@ InfInt InfInt::operator*(const InfInt& other) const {
 	InfInt b(other);
 	if (b.sign())
 		b.twos_complement();
-	for (; b > 0; b--)
-		temp += a;
+	for (size_type i = 0; i < size(); i++)
+		if (get(i))
+			temp += other << i;
 	if (sign() != other.sign())
 		temp.twos_complement();
 	return temp;
@@ -680,7 +683,7 @@ InfInt InfInt::operator&(const InfInt& other) const {
 	InfInt temp;
 	temp.m_sign = sign() && other.sign();
 	temp.m_number.resize(max_size, temp.sign());
-	for (unsigned long long i = 0; i < max_size; i++)
+	for (size_type i = 0; i < max_size; i++)
 		temp.m_number[i] = get(i) && other.get(i);
 	temp.clean();
 	return temp;
@@ -700,7 +703,7 @@ InfInt InfInt::operator|(const InfInt& other) const {
 	InfInt temp;
 	temp.m_sign = sign() || other.sign();
 	temp.m_number.resize(max_size, temp.sign());
-	for (unsigned long long i = 0; i < max_size; i++)
+	for (size_type i = 0; i < max_size; i++)
 		temp.m_number[i] = get(i) || other.get(i);
 	temp.clean();
 	return temp;
@@ -720,7 +723,7 @@ InfInt InfInt::operator^(const InfInt& other) const {
 	InfInt temp;
 	temp.m_sign = sign() != other.sign();
 	temp.m_number.resize(max_size, temp.sign());
-	for (unsigned long long i = 0; i < max_size; i++)
+	for (size_type i = 0; i < max_size; i++)
 		temp.m_number[i] = get(i) != other.get(i);
 	temp.clean();
 	return temp;
