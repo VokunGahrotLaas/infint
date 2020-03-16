@@ -26,13 +26,13 @@
  *  of "typedef scp::math::Int Int;"\
  * Don't be be silly and write scp::math::Int each time\
  * You can static_cast<Int>(x) or (Int)x or Int(x) or whatever from these types:\
-  * c++ char (char)\
-  * c++ integers (int, long long, unsigned long long, etc...)\
-  * c++ string (std::string)\
+  1. c++ char (char)\
+  2. c++ integers (int, long long, unsigned long long, etc...)\
+  3. c++ string (std::string)\
  * Cast from std::string have some rules:\
-  * If the string doesn't starts with '+' or '-' the number will be assumed to be positive\
-  * Any char other than '0' will be considered as '1' (except for the first char who can also be '+' or '-'), exemple: Int("10+3") == Int(0b1011) == Int(11)\
-  * Numbers will be assumed to be signed binary, exemple: Int("+101") == Int("101") == -Int("-011")\
+  1. If the string doesn't starts with '+' or '-' the number will be assumed to be positive\
+  2. Any char other than '0' will be considered as '1' (except for the first char who can also be '+' or '-'), exemple: Int("10+3") == Int(0b1011) == Int(11)\
+  3. Numbers will be assumed to be signed binary, exemple: Int("+101") == Int("101") == -Int("-011")\
  * The same rules applies to the output of .to_Bstr()\
  * added .full_div(divisor, remainder, quotient) that calculate the remander and the quotient in one execution\
  * added consts Int::neg_one, Int::zero and Int::pos_one, the most useful is Int::zero wich is used very often, this alows one allocation for multiple uses\
