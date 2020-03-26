@@ -1,7 +1,7 @@
 #ifndef INFINT_HPP
 #define INFINT_HPP
 
- // C++ libs
+// C++ libs
 #include <iostream> // std::ostream and std::string
 #include <algorithm> // std::reverse() (reverse std::string, I was too lazy to do it myself...)
 #include <vector> // std::vector<bool> for memory friendly data
@@ -92,7 +92,7 @@ protected:
 	// Attributes //
 	std::vector<bool> m_number;
 	bool m_sign;
-	char padding[sizeof(void*) - (sizeof(std::vector<bool>) + sizeof(bool)) % sizeof(void*)]; // usualy 7, alows the struct to be round when used un arrays
+	//char padding[sizeof(void*) - (sizeof(std::vector<bool>) + sizeof(bool)) % sizeof(void*)]; // usualy 7, alows the struct to be round when used un arrays
 	// Static Attributes //
 	static const InfInt neg_one;
 	static const InfInt zero;
@@ -320,7 +320,7 @@ InfInt& InfInt::twos_complement(void) {
 	temp.m_number.resize(size() + 1, false);
 	temp.m_number[1] = get(0);
 	temp.m_number[0] = !get(0);
-	for (size_type i = 1; i < size(); i++) {
+	for (size_type i = 1; i < size(); ++i) {
 		temp.m_number[i + 1] = get(i) && temp.get(i);
 		temp.m_number[i] = get(i) != temp.get(i);
 	}
@@ -354,7 +354,7 @@ std::string InfInt::to_Bstr(size_type str_size) const {
 		throw std::logic_error("std::string InfInt::b_str(size_type str_size) const: str_size <= size()");
 	std::string str;
 	str.reserve(str_size);
-	for (; str_size > size(); str_size--)
+	for (; str_size > size(); --str_size)
 		str.push_back('0' + m_sign);
 	for (size_t i = size() - 1; i > 0; --i) {
 		str.push_back('0' + get(i));
@@ -451,7 +451,7 @@ void InfInt::full_div(const InfInt& other, InfInt& quotient, InfInt& remainder) 
 	size_type size_diff = a.size() - b.size();
 	InfInt mask = InfInt::pos_one << size_diff;
 	b <<= size_diff;
-	while (a > other || a == b) {
+	while (a >= other) {
 		while (a < b) {
 			mask >>= 1;
 			b >>= 1;
@@ -481,7 +481,7 @@ bool InfInt::operator==(const InfInt& other) const {
 		return false;
 	if (sign() != other.sign())
 		return false;
-	for (unsigned long long i = 0; i < size(); i++)
+	for (unsigned long long i = 0; i < size(); ++i)
 		if (m_number[i] != other.get(i))
 			return false;
 	return true;
@@ -501,16 +501,14 @@ bool InfInt::operator>(const InfInt& other) const {
 	if (size() < other.size())
 		return sign();
 	if (size() > 1) {
-		for (size_type i = size() - 2; i > 0; i--) {
+		for (size_type i = size() - 2; i > 0; --i) {
 			if (get(i) == other.get(i))
 				continue;
-			if (get(i) == sign())
-				return false;
-			return true;
+			return get(i);
 		}
 	}
-	else
-		return get(0) != other.get(0) && get(0) != sign();
+	if (size() != 0)
+		return get(0) != other.get(0) && get(0);
 	return false;
 }
 
@@ -528,16 +526,14 @@ bool InfInt::operator<(const InfInt& other) const {
 	if (size() > other.size())
 		return sign();
 	if (size() > 1) {
-		for (size_type i = size() - 2; i > 0; i--) {
+		for (size_type i = size() - 2; i > 0; --i) {
 			if (get(i) == other.get(i))
 				continue;
-			if (other.get(i) == sign())
-				return false;
-			return true;
+			return other.get(i);
 		}
 	}
-	else
-		return get(0) != other.get(0) && other.get(0) != sign();
+	if (size() != 0)
+		return get(0) != other.get(0) && other.get(0);
 	return false;
 }
 
@@ -564,7 +560,7 @@ InfInt InfInt::operator+(const InfInt& other) const {
 			max_size = size();
 		InfInt temp;
 		temp.m_number.resize(max_size + 1, false);
-		for (size_type i = 0; i < max_size; i++) {
+		for (size_type i = 0; i < max_size; ++i) {
 			temp.m_number[i + 1] = ((get(i) != other.get(i)) && temp.get(i)) || (get(i) && other.get(i));
 			temp.m_number[i] = (get(i) != other.get(i)) != temp.get(i);
 		}
@@ -579,7 +575,7 @@ InfInt InfInt::operator+(const InfInt& other) const {
 			max_size = size();
 		InfInt temp;
 		temp.m_number.resize(max_size + 1, false);
-		for (size_type i = 0; i < max_size; i++) {
+		for (size_type i = 0; i < max_size; ++i) {
 			temp.m_number[i + 1] = ((get(i) != other.get(i)) && temp.get(i)) || (get(i) && other.get(i));
 			temp.m_number[i] = (get(i) != other.get(i)) != temp.get(i);
 		}
@@ -643,7 +639,7 @@ InfInt InfInt::operator*(const InfInt& other) const {
 	InfInt b(other);
 	if (b.sign())
 		b.twos_complement();
-	for (size_type i = 0; i < a.size(); i++)
+	for (size_type i = 0; i < a.size(); ++i)
 		if (a.get(i))
 			temp += b << i;
 	if (sign() != other.sign())
@@ -678,7 +674,7 @@ InfInt InfInt::operator/(const InfInt& other) const {
 	size_type size_diff = a.size() - b.size();
 	InfInt mask = InfInt::pos_one << size_diff;
 	b <<= size_diff;
-	while (a > other || a == b) {
+	while (a >= other) {
 		while (a < b) {
 			mask >>= 1;
 			b >>= 1;
@@ -719,7 +715,7 @@ InfInt InfInt::operator%(const InfInt& other) const {
 
 	size_type size_diff = a.size() - b.size();
 	b <<= size_diff;
-	while (a > other || a == b) {
+	while (a >= other) {
 		while (a < b)
 			b >>= 1;
 		a -= b;
@@ -745,7 +741,7 @@ InfInt InfInt::operator&(const InfInt& other) const {
 	InfInt temp;
 	temp.m_sign = sign() && other.sign();
 	temp.m_number.resize(max_size, temp.sign());
-	for (size_type i = 0; i < max_size; i++)
+	for (size_type i = 0; i < max_size; ++i)
 		temp.m_number[i] = get(i) && other.get(i);
 	temp.clean();
 	return temp;
@@ -765,7 +761,7 @@ InfInt InfInt::operator|(const InfInt& other) const {
 	InfInt temp;
 	temp.m_sign = sign() || other.sign();
 	temp.m_number.resize(max_size, temp.sign());
-	for (size_type i = 0; i < max_size; i++)
+	for (size_type i = 0; i < max_size; ++i)
 		temp.m_number[i] = get(i) || other.get(i);
 	temp.clean();
 	return temp;
@@ -785,7 +781,7 @@ InfInt InfInt::operator^(const InfInt& other) const {
 	InfInt temp;
 	temp.m_sign = sign() != other.sign();
 	temp.m_number.resize(max_size, temp.sign());
-	for (size_type i = 0; i < max_size; i++)
+	for (size_type i = 0; i < max_size; ++i)
 		temp.m_number[i] = get(i) != other.get(i);
 	temp.clean();
 	return temp;
@@ -848,8 +844,7 @@ InfInt& InfInt::pow(const InfInt& other) {
 		return *this;
 	}
 	InfInt tmp(*this);
-	InfInt i(other);
-	for (; i > 1; i--)
+	for (InfInt i = other; i > 1; --i)
 		*this *= tmp;
 	return *this;
 }
@@ -879,7 +874,7 @@ InfInt operator "" _i(unsigned long long other) { // alows the use of the macro 
 // output .to_Bstr() to an ostream for convenience and readability
 // bad code, strores in string before sending to stream, should directly send to stream
 std::ostream& operator<<(std::ostream& out, const InfInt& integer) {
-	out << integer.to_Bstr();
+	out << integer.to_str(10);
 	return out;
 }
 
