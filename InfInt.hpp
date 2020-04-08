@@ -1,7 +1,54 @@
+/* README.md
+# InfInt
+
+## Desc
+ C++ library for infinit integers.\
+ __Vers:__ 1.3
+
+## Auth
+ * [Maxence MICHOT](https://github.com/VokunGahrotLaas)
+
+## Stuff it does
+ * Numbers are stored as binary in std::vector<bool>, it as the adventage of using as few storage as posible
+ * Bitwise operators as &, |, ^, << and >> are implemented
+ * Comparaison operator as ==, !=, >, <=, < and >= are implemented
+ * Basic operation are obviusly permited +, -, *, / and %
+ * Those things are in too +=, -=, *=, /=, %=, &=, |=, ^=, <<= and >>=
+ * Incrementation and decrementation operators are implemented in postfix and prefix
+ * .size() returns the number of bits the number is composed of
+ * .get(pos) returns the bool in the number at pos or .sign() if pos >= .size()
+ * .sign() returns, well... the sign of the number
+ * .Bstr() returns a std::string representing the memory
+ * .Bstr(str_size) same as .Bstr() but add bits until the string is at least str_size long
+ * .str(int base) give out a std::string starting with '+' or '-' and ending with the number in the given base from 2 to 62, base 2 will not reflect memory sush as in .to_Bstr()
+ * 255_i is equivalent to InfInt(255) just like 255l is equivalent to long(255)
+ * Overloaded operator << for ostream, example cout << 5_i << endl; outputs: "+101\n"
+ * You can static_cast<InfInt>(x) or (InfInt)x or InfInt(x) or whatever from these types:
+   * c++ char (char)
+   * c++ integers (int, long long, unsigned long long, etc...)
+   * c++ string (std::string)
+ * Cast from std::string have some rules:
+   * If the string doesn't starts with '+' or '-' the number will be assumed to be positive
+   * Any char other than '0' will be considered as '1' (except for the first char who can also be '+' or '-'), exemple: InfInt("10+3") == InfInt(0b1011) == InfInt(11)
+   * Numbers will be assumed to be signed binary, exemple: InfInt("+101") == InfInt("101") == -InfInt("-011")
+ * The same rules applies to the output of .to_Bstr()
+ * added {void InfInt::full_div(divisor, remainder, quotient) const} that calculate the remainder and the quotient in one execution
+ * added consts InfInt::neg_one, InfInt::zero and InfInt::pos_one, the most useful is InfInt::zero wich is used very often, this alows one allocation for multiple uses
+ * re-done operator* (faster algorithm)
+ * re-done operator/, operator% and full_div (faster algorithm)
+ * Cast from std::string with base:
+   * Same format as {void InfInt::to_str(int base)}
+   * Base between 2 and 62 included
+   * The '+' sign can be implicite
+   * Any thing other than the sign or a digit under base will be 0
+ * Added {InfInt& InfInt::full_div(divisor, remainder)} use (*this) as quotient
+ * All not const operators return a reference to self
+ */
+
 #ifndef INFINT_HPP
 #define INFINT_HPP
 
-// C++ libs
+ // C++ libs
 #include <iostream> // std::ostream and std::string
 #include <algorithm> // std::reverse() (reverse std::string, I was too lazy to do it myself...)
 #include <vector> // std::vector<bool> for memory friendly data
@@ -23,7 +70,7 @@ public:
 	InfInt(long long other); // long long
 	InfInt(unsigned long long other); // unsigned long long
 	InfInt(std::string other); // std::string
-	InfInt(std::string other, int base);
+	InfInt(std::string other, int base); // std::string with base
 	// destructor //
 	~InfInt(void); // empty
 	// const getter //
@@ -34,12 +81,13 @@ public:
 	InfInt& ones_complement(void);
 	InfInt& twos_complement(void);
 	// casting //
-	std::string to_Bstr(void) const;
-	std::string to_Bstr(size_type str_size) const;
-	std::string to_str(int base) const;
+	std::string Bstr(void) const;
+	std::string Bstr(size_type str_size) const;
+	std::string str(int base) const;
 	template <class T> T to_int(void) const;
 	template <class T> T to_int_safe(void) const;
-	// ??? //
+	// 2 in 1 operator //
+	InfInt& full_div(const InfInt& other, InfInt& remainder);
 	void full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) const;
 	// operator //
 	// equal
@@ -92,7 +140,7 @@ protected:
 	// Attributes //
 	std::vector<bool> m_number;
 	bool m_sign;
-	//char padding[sizeof(void*) - (sizeof(std::vector<bool>) + sizeof(bool)) % sizeof(void*)]; // usualy 7, alows the struct to be round when used un arrays
+	//char padding[sizeof(void*) - (sizeof(std::vector<bool>) + sizeof(bool)) % sizeof(void*)]; // usualy 7, alows the struct to be round when used in an arrays
 	// Static Attributes //
 	static const InfInt neg_one;
 	static const InfInt zero;
@@ -286,6 +334,43 @@ InfInt::InfInt(std::string other) {
 	clean();
 }
 
+InfInt::InfInt(std::string other, int base) {
+	if (base < 2 || base > 62)
+		throw std::invalid_argument("InfInt::InfInt(std::string other, int base): base must be beetween 2 and 62");
+	if (other.empty()) {
+		m_sign = false;
+		m_number.push_back(false);
+		return;
+	}
+	if (other.front() == '-') {
+		m_sign = true;
+		other.assign(other, 1, other.size());
+	}
+	else if (other.front() == '+') {
+		m_sign = false;
+		other.assign(other, 1, other.size());
+	}
+	else
+		m_sign = false;
+	std::string::size_type other_size = other.size();
+	InfInt p = InfInt::pos_one;
+	InfInt infint_base = base;
+	while (other.size() > 0) {
+		unsigned char c = other.back();
+		if ('0' <= c && c <= '9')
+			c -= '0';
+		else if ('a' <= c && c <= 'z')
+			c -= 'a' - 10;
+		else if ('A' <= c && c <= 'Z')
+			c -= 'A' - 36;
+		if (c < base)
+			*this += InfInt(c) * p;
+		other.pop_back();
+		p *= infint_base;
+	}
+	clean();
+}
+
 InfInt::~InfInt(void) {
 	//
 }
@@ -331,7 +416,7 @@ InfInt& InfInt::twos_complement(void) {
 	return *this;
 }
 
-std::string InfInt::to_Bstr(void) const {
+std::string InfInt::Bstr(void) const {
 	std::string str;
 	str.reserve(size());
 	if (m_sign)
@@ -347,7 +432,7 @@ std::string InfInt::to_Bstr(void) const {
 	return str;
 }
 
-std::string InfInt::to_Bstr(size_type str_size) const {
+std::string InfInt::Bstr(size_type str_size) const {
 	if (str_size == 0)
 		str_size = size() + 1;
 	if (str_size <= size())
@@ -365,7 +450,7 @@ std::string InfInt::to_Bstr(size_type str_size) const {
 	return str;
 }
 
-std::string InfInt::to_str(int base) const {
+std::string InfInt::str(int base) const {
 	if (base < 2 || base > 62)
 		throw std::invalid_argument("std::string InfInt::str(int base) const: base must be beetween 2 and 62");
 	std::string str;
@@ -413,6 +498,61 @@ T InfInt::to_int_safe(void) const {
 	for (size_type i = 0; i < bits_in_T; i++)
 		temp |= static_cast<T>(get(i)) << i;
 	return temp;
+}
+
+InfInt& InfInt::full_div(const InfInt& other, InfInt& quotient) {
+	if (*this == InfInt::zero) {
+		*this = InfInt::zero;
+		quotient = InfInt::zero;
+		return *this;
+	}
+	if (other == InfInt::zero) {
+		throw std::invalid_argument("InfInt& InfInt::full_div(const InfInt& other, InfInt& quotient): Cannot divide by 0");
+	}
+	if (other == InfInt::pos_one) {
+		*this = InfInt::zero;
+		quotient = *this;
+		return *this;
+	}
+	if (other == InfInt::neg_one) {
+		*this = InfInt::zero;
+		quotient = -*this;
+		return *this;
+	}
+	if (other.size() > this->size()) {
+		quotient = InfInt::zero;
+		return *this;
+	}
+
+	InfInt q(InfInt::zero);
+	bool sign = this->sign();
+	if (sign)
+		this->twos_complement();
+	InfInt b(other);
+	if (b.sign())
+		b.twos_complement();
+
+	size_type size_diff = this->size() - b.size();
+	InfInt mask = InfInt::pos_one << size_diff;
+	b <<= size_diff;
+	while ((*this) >= other) {
+		while ((*this) < b) {
+			mask >>= 1;
+			b >>= 1;
+		}
+		*this -= b;
+		q |= mask;
+		mask >>= b.size() - this->size();
+		b >>= b.size() - this->size();
+	}
+
+	quotient = *this;
+	*this = q;
+	if (sign != other.sign()) {
+		this->twos_complement();
+		quotient.twos_complement();
+	}
+	return *this;
 }
 
 void InfInt::full_div(const InfInt& other, InfInt& quotient, InfInt& remainder) const {
@@ -625,7 +765,7 @@ InfInt& InfInt::operator--(void) {
 
 InfInt InfInt::operator--(int) {
 	InfInt return_val(*this);
-	-- (*this);
+	--(*this);
 	return return_val;
 }
 
@@ -670,7 +810,7 @@ InfInt InfInt::operator/(const InfInt& other) const {
 	InfInt b(other);
 	if (b.sign())
 		b.twos_complement();
-	
+
 	size_type size_diff = a.size() - b.size();
 	InfInt mask = InfInt::pos_one << size_diff;
 	b <<= size_diff;
@@ -831,20 +971,20 @@ InfInt& InfInt::operator>>=(size_type other) {
 }
 
 InfInt& InfInt::pow(const InfInt& other) {
-	if (other == 0) {
-		if (*this == 0)
-			throw std::exception("Division by zero");
-		*this = 1;
+	if (other == InfInt::zero) {
+		if (*this == InfInt::zero)
+			throw std::exception("InfInt& InfInt::pow(const InfInt& other): Division by zero");
+		*this = InfInt::pos_one;
 		return *this;
 	}
-	if (other < 0) {
-		if (*this == 0)
-			throw std::exception("Division by zero");
-		*this = 0;
+	if (other < InfInt::zero) {
+		if (*this == InfInt::zero)
+			throw std::exception("InfInt& InfInt::pow(const InfInt& other): Division by zero");
+		*this = InfInt::zero;
 		return *this;
 	}
 	InfInt tmp(*this);
-	for (InfInt i = other; i > 1; --i)
+	for (InfInt i = other; i > InfInt::pos_one; --i)
 		*this *= tmp;
 	return *this;
 }
@@ -871,10 +1011,10 @@ InfInt operator "" _i(unsigned long long other) { // alows the use of the macro 
 	return static_cast<InfInt>(other);
 }
 
-// output .to_Bstr() to an ostream for convenience and readability
+// output .to_str(10) to an ostream for convenience and readability
 // bad code, strores in string before sending to stream, should directly send to stream
-std::ostream& operator<<(std::ostream& out, const InfInt& integer) {
-	out << integer.to_str(10);
+std::ostream& operator<<(std::ostream& out, const InfInt& infint) {
+	out << infint.str(10);
 	return out;
 }
 
