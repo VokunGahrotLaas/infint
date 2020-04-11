@@ -87,8 +87,8 @@ public:
 	template <class T> T to_int(void) const;
 	template <class T> T to_int_safe(void) const;
 	// 2 in 1 operator //
-	InfInt& full_div(const InfInt& other, InfInt& quotient);
-	void full_div(const InfInt& other, InfInt& quotient, InfInt& remainder) const;
+	InfInt& full_div(const InfInt& other, InfInt& remainder);
+	void full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) const;
 	// operator //
 	// equal
 	InfInt& operator=(const InfInt& other);
@@ -457,8 +457,9 @@ std::string InfInt::str(int base) const {
 	if (temp.sign())
 		temp.twos_complement();
 	InfInt remainder;
+	InfInt infint_base(base);
 	while (temp != InfInt::zero) {
-		temp.full_div(base, remainder);
+		temp.full_div(infint_base, remainder);
 		if (remainder < 10)
 			str.push_back('0' + remainder.to_int<char>());
 		else if (remainder < 36)
@@ -497,9 +498,9 @@ T InfInt::to_int_safe(void) const {
 	return temp;
 }
 
-InfInt& InfInt::full_div(const InfInt& other, InfInt& quotient) {
+InfInt& InfInt::full_div(const InfInt& other, InfInt& remainder) {
 	if (other == InfInt::zero)
-		throw std::invalid_argument("InfInt& InfInt::full_div(const InfInt& other, InfInt& quotient): Cannot divide by 0");
+		throw std::invalid_argument("InfInt& InfInt::full_div(const InfInt& other, InfInt& remainder): Cannot divide by 0");
 
 	InfInt q;
 	bool sign = this->sign();
@@ -508,13 +509,13 @@ InfInt& InfInt::full_div(const InfInt& other, InfInt& quotient) {
 
 	if (b >= (*this)) {
 		if (b == (*this)) {
-			*this = InfInt::pos_one;
-			quotient = InfInt::zero;
-		} else {
 			*this = InfInt::zero;
+			remainder = InfInt::pos_one;
+		} else {
 			if (this->sign() != other.sign())
-				b.twos_complement();
-			quotient = b;
+				this->twos_complement();
+			remainder = *this;
+			*this = InfInt::zero;
 		}
 		return *this;
 	}
@@ -533,18 +534,18 @@ InfInt& InfInt::full_div(const InfInt& other, InfInt& quotient) {
 		b >>= b.size() - this->size();
 	}
 
-	quotient = *this;
+	remainder = *this;
 	*this = q;
 	if (sign != other.sign()) {
 		this->twos_complement();
-		quotient.twos_complement();
+		remainder.twos_complement();
 	}
 	return *this;
 }
 
-void InfInt::full_div(const InfInt& other, InfInt& quotient, InfInt& remainder) const {
+void InfInt::full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) const {
 	if (other == InfInt::zero)
-		throw std::invalid_argument("void InfInt::full_div(const InfInt& other, InfInt& quotient, InfInt& remainder) const: Cannot divide by 0");
+		throw std::invalid_argument("void InfInt::full_div(const InfInt& other, InfInt& remainder, InfInt& quotient) const: Cannot divide by 0");
 
 	InfInt q;
 	InfInt a(InfInt::abs(*this));
@@ -552,23 +553,19 @@ void InfInt::full_div(const InfInt& other, InfInt& quotient, InfInt& remainder) 
 
 	if (b >= a) {
 		if (b == a) {
-			remainder = InfInt::pos_one;
-			quotient = InfInt::zero;
-		} else {
 			remainder = InfInt::zero;
-			if (sign() != other.sign())
+			quotient = InfInt::pos_one;
+		} else {
+			if (this->sign() != other.sign())
 				a.twos_complement();
-			quotient = a;
+			remainder = a;
+			quotient = InfInt::zero;
 		}
 		return;
 	}
 
 	size_type size_diff = a.size() - b.size();
-
-	std::cout << size_diff << std::endl;
 	InfInt mask = InfInt::pos_one << size_diff;
-	std::cout << "ok" << std::endl << std::endl;
-
 	b <<= size_diff;
 	while (a >= other) {
 		while (a < b) {
