@@ -42,3 +42,5 @@
    * Any thing other than the sign or a digit under base will be 0
  * Added {InfInt& InfInt::full_div(divisor, remainder)} use (*this) as quotient
  * All not const operators return a reference to self
+ * pow is now using binary exponentiation, went from O(n) to O(log2(n))
+ * added modpow(a, b, m), return a ** b % m
