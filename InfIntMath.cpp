@@ -181,4 +181,39 @@ bool coprime(const InfInt& a, const InfInt& b) {
 	return true;*/
 }
 
+bool probable_prime_base(const InfInt& n, const InfInt& a) {
+	InfInt n1 = n - InfInt::pos_one;
+	if (!(InfInt::pos_one < a && a < n1))
+		throw std::invalid_argument("must have 1 < a < n - 1");
+
+	std::cout << "n: " << n << std::endl;
+	std::cout << "a: " << a << std::endl;
+
+	InfInt::size_type s = 0;
+	InfInt d;
+	for (InfInt::size_type i = 0; i < n1.size(); ++i) {
+		if (!n1.get(i))
+			continue;
+		s = i;
+		d = n1 >> i;
+		break;
+	}
+
+	std::cout << "s: " << s << std::endl;
+	std::cout << "d: " << d << std::endl;
+
+	InfInt result = modpow(a, d, n);
+	if (result == InfInt::pos_one)
+		return true;
+
+	for (InfInt::size_type r = 0; r < s; ++r) {
+		std::cout << "r: " << r << std::endl;
+		InfInt result = modpow(a, d * (InfInt::pos_one << r), n);
+		if (result == n1)
+			return true;
+	}
+
+	return false;
+}
+
 } // namespace InfIntMath

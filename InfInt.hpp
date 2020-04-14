@@ -52,7 +52,7 @@
 #ifndef INFINT_HPP
 #define INFINT_HPP
 
-// C++ libs
+// std libs
 #include <iostream> // std::ostream and std::string
 #include <algorithm> // std::reverse() (reverse std::string, I was too lazy to do it myself...)
 #include <vector> // std::vector<bool> for memory friendly data

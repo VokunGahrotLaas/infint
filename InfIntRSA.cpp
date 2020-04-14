@@ -35,7 +35,7 @@ void InfIntRSA::create_keys(const InfInt& p, const InfInt& q) {
 
 	//std::cout << "e: " << this->m_e << std::endl;
 
-	this->m_d = InfIntMath::egcd(this->m_e, phi).x();
+	this->m_d = InfIntMath::modinv(this->m_e, phi);
 	if (this->m_d.sign())
 		this->m_d += phi;
 
@@ -59,7 +59,7 @@ void InfIntRSA::create_keys(const InfInt& p, const InfInt& q, const InfInt& min_
 
 	//std::cout << "e: " << this->m_e << std::endl;
 
-	this->m_d = InfIntMath::modinv(this->m_e, phi);
+	this->m_d = InfIntMath::egcd(this->m_e, phi).x();
 	if (this->m_d.sign())
 		this->m_d += phi;
 

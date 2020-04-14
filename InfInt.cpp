@@ -321,8 +321,6 @@ std::string InfInt::str(int base) const {
 	}
 	if (sign())
 		str.push_back('-');
-	else
-		str.push_back('+');
 	std::reverse(str.begin(), str.end());
 	return str;
 }

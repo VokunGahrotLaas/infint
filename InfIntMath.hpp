@@ -1,7 +1,9 @@
 #ifndef INFINTMATH_HPP
 #define INFINTMATH_HPP
 
+// InfInt libs
 #include "InfInt.hpp"
+#include "InfIntRandom.hpp"
 
 namespace InfIntMath {
 
@@ -23,6 +25,8 @@ InfInt modinv(const InfInt& a, const InfInt& b);
 
 bool congruent_modulo(const InfInt& a, const InfInt& b, const InfInt& n);
 bool coprime(const InfInt& a, const InfInt& b);
+
+bool probable_prime_base(const InfInt& n, const InfInt& a);
 
 } // namesapce InfIntMath
 
