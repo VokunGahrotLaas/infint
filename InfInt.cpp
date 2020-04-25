@@ -247,19 +247,19 @@ InfInt& InfInt::twos_complement(void) {
 	if (*this == InfInt::zero)
 		return *this;
 	this->ones_complement();
-	InfInt temp;
-	temp.m_sign = this->sign();
-	temp.m_number.resize(this->size() + 1, false);
-	temp.m_number[1] = this->get(0);
-	temp.m_number[0] = !this->get(0);
+	InfInt tmp;
+	tmp.m_sign = this->sign();
+	tmp.m_number.resize(this->size() + 1, false);
+	tmp.m_number[1] = this->get(0);
+	tmp.m_number[0] = !this->get(0);
 	for (size_type i = 1; i < this->size(); ++i) {
-		temp.m_number[i + 1] = this->get(i) && temp.get(i);
-		temp.m_number[i] = this->get(i) != temp.get(i);
+		tmp.m_number[i + 1] = this->get(i) && tmp.get(i);
+		tmp.m_number[i] = this->get(i) != tmp.get(i);
 	}
-	if (!temp.m_number.back())
-		temp.m_number.pop_back();
-	temp.clean();
-	*this = temp;
+	if (!tmp.m_number.back())
+		tmp.m_number.pop_back();
+	tmp.clean();
+	*this = tmp;
 	return *this;
 }
 
@@ -301,16 +301,16 @@ std::string InfInt::str(int base) const {
 	if (base < 2 || base > 62)
 		throw std::invalid_argument("std::string InfInt::str(int base) const: base must be beetween 2 and 62");
 	std::string str;
-	InfInt temp(*this);
-	if (temp == InfInt::zero)
+	InfInt tmp(*this);
+	if (tmp == InfInt::zero)
 		str.push_back('0');
-	if (temp.sign())
-		temp.twos_complement();
+	if (tmp.sign())
+		tmp.twos_complement();
 	InfInt remainder;
 	InfInt infint_base(base);
-	while (temp != InfInt::zero) {
-		auto result = InfInt::full_div(temp, infint_base);
-		temp = result.quotient();
+	while (tmp != InfInt::zero) {
+		auto result = InfInt::fulldiv(tmp, infint_base);
+		tmp = result.quotient();
 		remainder = result.remainder();
 		if (remainder < 10)
 			str.push_back('0' + remainder.to_int<char>());
@@ -319,53 +319,62 @@ std::string InfInt::str(int base) const {
 		else
 			str.push_back('A' + remainder.to_int<char>() - 36);
 	}
-	if (sign())
+	if (this->sign())
 		str.push_back('-');
 	std::reverse(str.begin(), str.end());
 	return str;
 }
 
-template <class T>
-T InfInt::to_int(void) const {
-	size_type bits_in_T = sizeof(T) * 8;
-	T temp = 0;
-	for (size_type i = 0; i < bits_in_T; i++)
-		temp |= static_cast<T>(this->get(i)) << i;
-	return temp;
-}
-
-template <class T>
-T InfInt::to_int_safe(void) const {
-	size_type bits_in_T = sizeof(T) * 8;
-	if (bits_in_T < this->size())
-		throw std::overflow_error("template <class T> T InfInt::to_int_safe(void) const: Given type is too litle!");
+std::string InfInt::str(void) const {
+	InfInt powten = 10000000000000000000;
+	InfInt::size_type size = 19;
+	std::string str;
+	InfInt tmp(*this);
+	if (tmp.sign())
+		tmp.twos_complement();
+	while (true) { // do {...} while (temp != InfInt::zero);
+		auto result = InfInt::fulldiv(tmp, powten);
+		tmp = result.quotient();
+		if (tmp == InfInt::zero) {
+			str = std::to_string(result.remainder().to_int<uint64_t>()) + str;
+			break;
+		}
+		std::string tmpstr = std::to_string(result.remainder().to_int<uint64_t>());
+		InfInt::size_type tmpsize = size - tmpstr.size();
+		str = tmpstr + str;
+		tmpstr.clear();
+		for (InfInt::size_type i = 0; i < tmpsize; ++i)
+			tmpstr.push_back('0');
+		str = tmpstr + str;
+	}
 	if (this->sign())
-		if (static_cast<T>(0) - static_cast<T>(1) < static_cast<T>(0))
-			throw std::overflow_error("template <class T> T InfInt::to_int_safe(void) const: Given type do not have the right signess!");
-	T temp = 0;
-	for (size_type i = 0; i < bits_in_T; i++)
-		temp |= static_cast<T>(this->get(i)) << i;
-	return temp;
+		return '-' + str;
+	else
+		return str;
 }
 
-InfIntFullDivResult InfInt::full_div(const InfInt& _a, const InfInt& _b) {
+InfIntFullDivResult InfInt::fulldiv(const InfInt& _a, const InfInt& _b) {
 	if (_b == InfInt::zero)
-		throw std::invalid_argument("static InfIntFulldivResult InfInt::full_div(const InfInt& _a, const InfInt& _b): Cannot divide by 0");
+		throw std::invalid_argument("static InfIntFulldivResult InfInt::fulldiv(const InfInt& _a, const InfInt& _b): Cannot divide by 0");
 
 	InfInt q;
 	InfInt a(_a);
 	if (a.sign())
 		a.twos_complement();
-	InfInt b(_b);
-	if (b.sign())
-		b.twos_complement();
+	InfInt abs_b(_b);
+	if (abs_b.sign())
+		abs_b.twos_complement();
+	InfInt b(abs_b);
 
 	if (b >= a) {
 		InfInt remainder, quotient;
 		if (b == a) {
-			quotient = InfInt::pos_one;
+			if (_a.sign() == _b.sign())
+				quotient = InfInt::pos_one;
+			else
+				quotient = InfInt::neg_one;
 		} else {
-			if (_a.sign() != _b.sign())
+			if (a.sign() != _a.sign())
 				a.twos_complement();
 			remainder = a;
 		}
@@ -375,7 +384,7 @@ InfIntFullDivResult InfInt::full_div(const InfInt& _a, const InfInt& _b) {
 	InfInt::size_type size_diff = a.size() - b.size();
 	InfInt mask = InfInt::pos_one << size_diff;
 	b <<= size_diff;
-	while (a >= _b) {
+	while (a >= abs_b) {
 		while (a < b) {
 			mask >>= 1;
 			b >>= 1;
@@ -388,10 +397,10 @@ InfIntFullDivResult InfInt::full_div(const InfInt& _a, const InfInt& _b) {
 
 	InfInt quotient = q;
 	InfInt remainder = a;
-	if (_a.sign() != _b.sign()) {
+	if (_a.sign() != _b.sign())
 		quotient.twos_complement();
+	if (remainder.sign() != _a.sign())
 		remainder.twos_complement();
-	}
 	return InfIntFullDivResult(quotient, remainder);
 }
 
@@ -471,58 +480,33 @@ InfInt InfInt::operator+(void) const {
 }
 
 InfInt InfInt::operator-(void) const {
-	InfInt temp(*this);
-	temp.twos_complement();
-	return temp;
+	InfInt tmp(*this);
+	tmp.twos_complement();
+	return tmp;
 }
 
 InfInt InfInt::operator+(const InfInt& other) const {
-	if (!this->sign() && !other.sign()) { // both positive
-		size_type max_size;
-		if (this->m_number.size() < other.m_number.size())
-			max_size = other.size();
-		else
-			max_size = this->size();
-		InfInt temp;
-		temp.m_number.resize(max_size + 1, false);
-		for (size_type i = 0; i < max_size; ++i) {
-			temp.m_number[i + 1] = ((this->get(i) != other.get(i)) && temp.get(i)) || (this->get(i) && other.get(i));
-			temp.m_number[i] = (this->get(i) != other.get(i)) != temp.get(i);
-		}
-		temp.clean();
-		return temp;
-	}
-	if (!this->sign() && other.sign()) { // only *this is positive
-		if (*this < (-other))
-			return -((-other) + (-(*this)));
-		size_type max_size;
-		if (this->m_number.size() < other.m_number.size())
-			max_size = other.size();
-		else
-			max_size = this->size();
-		InfInt temp;
-		temp.m_number.resize(max_size + 1, false);
-		for (size_type i = 0; i < max_size; ++i) {
-			temp.m_number[i + 1] = ((this->get(i) != other.get(i)) && temp.get(i)) || (this->get(i) && other.get(i));
-			temp.m_number[i] = (this->get(i) != other.get(i)) != temp.get(i);
-		}
-		bool sign = temp.m_number.back();
-		temp.m_number.pop_back();
-		temp.clean();
-		if (!sign)
-			temp.twos_complement();
-		return temp;
-	}
-	if (this->sign() && !other.sign()) { // only other is positive
-		return other + *this;
-	} else { // both are negative
-		return -(-(*this) + -other);
-	}
+	return InfInt(*this) += other;
 }
 
 InfInt& InfInt::operator+=(const InfInt& other) {
-	*this = *this + other;
-	return *this;
+	size_type max_size;
+	if (this->m_number.size() < other.m_number.size())
+		max_size = other.size();
+	else
+		max_size = this->size();
+	this->m_number.resize(max_size, this->sign());
+	bool old_carry = false;
+	for (size_type i = 0; i < max_size; ++i) {
+		bool new_carry = ((this->get(i) != other.get(i)) && old_carry) || (this->get(i) && other.get(i));
+		this->m_number[i] = (this->get(i) != other.get(i)) != old_carry;
+		old_carry = new_carry;
+	}
+	if (this->sign() == other.sign())
+		this->m_number.push_back(old_carry);
+	else
+		this->m_sign = !old_carry;
+	return this->clean();
 }
 
 InfInt& InfInt::operator++(void) {
@@ -531,29 +515,27 @@ InfInt& InfInt::operator++(void) {
 }
 
 InfInt InfInt::operator++(int) {
-	InfInt return_val(*this);
+	InfInt tmp(*this);
 	++(*this);
-	return return_val;
+	return tmp;
 }
 
 InfInt InfInt::operator-(const InfInt& other) const {
-	return (*this) + (-other);
+	return InfInt(*this) -= other;
 }
 
 InfInt& InfInt::operator-=(const InfInt& other) {
-	*this = (*this) - other;
-	return *this;
+	return (*this) += (-other);
 }
 
 InfInt& InfInt::operator--(void) {
-	*this -= InfInt::pos_one;
-	return *this;
+	return *this += InfInt::neg_one;
 }
 
 InfInt InfInt::operator--(int) {
-	InfInt return_val(*this);
+	InfInt tmp(*this);
 	--(*this);
-	return return_val;
+	return tmp;
 }
 
 InfInt InfInt::operator*(const InfInt& other) const {
@@ -593,9 +575,12 @@ InfInt InfInt::operator/(const InfInt& other) const {
 	InfInt b = abs_other;
 
 	if (b >= a) {
-		if (b == a)
-			return InfInt::pos_one;
-		else
+		if (b == a) {
+			if (this->sign() == other.sign())
+				return InfInt::pos_one;
+			else
+				return InfInt::neg_one;
+		} else
 			return InfInt::zero;
 	}
 
@@ -630,15 +615,16 @@ InfInt InfInt::operator%(const InfInt& other) const {
 	InfInt a(*this);
 	if (a.sign())
 		a.twos_complement();
-	InfInt b(other);
-	if (b.sign())
-		b.twos_complement();
+	InfInt abs_other(other);
+	if (abs_other.sign())
+		abs_other.twos_complement();
+	InfInt b = abs_other;
 
 	if (b >= a) {
 		if (b == a)
 			return InfInt::zero;
 		else {
-			if (sign() != other.sign())
+			if (a.sign() != this->sign())
 				a.twos_complement();
 			return a;
 		}
@@ -646,14 +632,14 @@ InfInt InfInt::operator%(const InfInt& other) const {
 
 	size_type size_diff = a.size() - b.size();
 	b <<= size_diff;
-	while (a >= other) {
+	while (a >= abs_other) {
 		while (a < b)
 			b >>= 1;
 		a -= b;
 		b >>= b.size() - a.size();
 	}
 
-	if (this->sign() != other.sign())
+	if (a.sign() != this->sign())
 		a.twos_complement();
 	return a;
 }
@@ -674,13 +660,20 @@ InfInt InfInt::operator&(const InfInt& other) const {
 	temp.m_number.resize(max_size, temp.sign());
 	for (size_type i = 0; i < max_size; ++i)
 		temp.m_number[i] = this->get(i) && other.get(i);
-	temp.clean();
-	return temp;
+	return temp.clean();
 }
 
 InfInt& InfInt::operator&=(const InfInt& other) {
-	*this = (*this) & other;
-	return *this;
+	size_type max_size = 1;
+	if (this->size() < other.size())
+		max_size = other.size();
+	else
+		max_size = this->size();
+	this->m_sign = this->sign() && other.sign();
+	this->m_number.resize(max_size, this->sign());
+	for (size_type i = 0; i < max_size; ++i)
+		this->m_number[i] = this->get(i) && other.get(i);
+	return this->clean();
 }
 
 InfInt InfInt::operator|(const InfInt& other) const {
@@ -694,13 +687,20 @@ InfInt InfInt::operator|(const InfInt& other) const {
 	temp.m_number.resize(max_size, temp.sign());
 	for (size_type i = 0; i < max_size; ++i)
 		temp.m_number[i] = this->get(i) || other.get(i);
-	temp.clean();
-	return temp;
+	return temp.clean();
 }
 
 InfInt& InfInt::operator|=(const InfInt& other) {
-	*this = *this | other;
-	return *this;
+	size_type max_size;
+	if (this->size() < other.size())
+		max_size = other.size();
+	else
+		max_size = this->size();
+	this->m_sign = this->sign() || other.sign();
+	this->m_number.resize(max_size, this->sign());
+	for (size_type i = 0; i < max_size; ++i)
+		this->m_number[i] = this->get(i) || other.get(i);
+	return this->clean();
 }
 
 InfInt InfInt::operator^(const InfInt& other) const {
@@ -714,17 +714,24 @@ InfInt InfInt::operator^(const InfInt& other) const {
 	temp.m_number.resize(max_size, temp.sign());
 	for (size_type i = 0; i < max_size; ++i)
 		temp.m_number[i] = this->get(i) != other.get(i);
-	temp.clean();
-	return temp;
+	return temp.clean();
 }
 
 InfInt& InfInt::operator^=(const InfInt& other) {
-	*this = *this ^ other;
-	return *this;
+	size_type max_size;
+	if (this->size() < other.size())
+		max_size = other.size();
+	else
+		max_size = this->size();
+	this->m_sign = this->sign() != other.sign();
+	this->m_number.resize(max_size, this->sign());
+	for (size_type i = 0; i < max_size; ++i)
+		this->m_number[i] = this->get(i) != other.get(i);
+	return this->clean();
 }
 
 InfInt InfInt::operator<<(size_type other) const {
-	if (other == 0)
+	if (other == 0 || (*this) == InfInt::zero)
 		return *this;
 	InfInt temp(*this);
 	temp.m_number.insert(temp.m_number.begin(), other, false);
@@ -732,7 +739,7 @@ InfInt InfInt::operator<<(size_type other) const {
 }
 
 InfInt& InfInt::operator<<=(size_type other) {
-	if (other == 0)
+	if (other == 0 || (*this) == InfInt::zero)
 		return *this;
 	this->m_number.insert(this->m_number.begin(), other, false);
 	return *this;
@@ -745,7 +752,7 @@ InfInt InfInt::operator>>(size_type other) const {
 	if (other < size())
 		temp.m_number.erase(temp.m_number.begin(), temp.m_number.begin() + static_cast<long long>(other));
 	else
-		temp.m_number.erase(temp.m_number.begin(), temp.m_number.begin() + static_cast<long long>(size() - 1));
+		temp.m_number.clear();
 	temp.clean();
 	return temp;
 }
@@ -756,33 +763,34 @@ InfInt& InfInt::operator>>=(size_type other) {
 	if (other < this->size())
 		this->m_number.erase(this->m_number.begin(), this->m_number.begin() + static_cast<long long>(other));
 	else
-		this->m_number.erase(this->m_number.begin(), this->m_number.begin() + static_cast<long long>(this->size() - 1));
+		this->m_number.clear();
 	this->clean();
 	return *this;
 }
 
-void InfInt::clean(void) {
+InfInt& InfInt::clean(void) {
 	while (this->size() > 1 && this->m_number.back() == this->m_sign)
 		this->m_number.pop_back();
 	if (this->size() == 0)
 		this->m_number.push_back(this->m_sign);
+	return *this;
 }
 
-InfInt const InfInt::neg_one(-1);
-InfInt const InfInt::zero(0);
-InfInt const InfInt::pos_one(1);
+const InfInt InfInt::neg_one(-1);
+const InfInt InfInt::zero(0);
+const InfInt InfInt::pos_one(1);
 
 
 
 // Outside the class //
 
 // alows the use of the macro _inf to transform a unsigned long long to an InfInt
-InfInt operator "" _inf(unsigned long long other) {
+InfInt operator "" _infint(unsigned long long other) {
 	return static_cast<InfInt>(other);
 }
 
 std::ostream& operator<<(std::ostream& out, const InfInt& infint) {
-	out << infint.str(10);
+	out << infint.str();
 	return out;
 }
 

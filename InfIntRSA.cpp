@@ -27,11 +27,7 @@ void InfIntRSA::create_keys(const InfInt& p, const InfInt& q) {
 
 	//std::cout << "phi: " << phi << std::endl;
 
-	for (
-		this->m_e = InfInt(2);
-		!InfIntMath::coprime(this->m_e, phi);
-		++this->m_e
-		);
+	this->m_e = InfInt(65'537);
 
 	//std::cout << "e: " << this->m_e << std::endl;
 
