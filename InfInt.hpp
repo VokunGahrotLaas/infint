@@ -1,11 +1,16 @@
 #ifndef INFINT_HPP
 #define INFINT_HPP
 
-// std libs
-#include <iostream> // iostreams (cout, cin, etc...)
-#include <string> // std::string
-#include <algorithm> // std::reverse() (reverse std::string, I was too lazy to do it myself...)
-#include <vector> // std::vector<bool> for memory friendly data
+// C++ std lib
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <vector>
+#include <limits>
+
+// C std lib
+#include <cstdlib>
+#include <cmath>
 
 
 class InfIntFullDivResult;
@@ -13,25 +18,28 @@ class InfIntFullDivResult;
 
 class InfInt {
 public:
-	// typedef //
-	typedef std::vector<bool>::size_type size_type; // usualy unsigned long long
-	// constructor //
-	// default
+	typedef std::vector<bool>::size_type size_type;
+	
 	InfInt(void); // init to +0
-	// copy
-	InfInt(char other); // char
-	InfInt(const InfInt& other); // InfInt
-	InfInt(int other); // int
-	InfInt(unsigned int other); // unsigned int
-	InfInt(long other); // long
-	InfInt(unsigned long other); // unsigned long
-	InfInt(long long other); // long long
-	InfInt(unsigned long long other); // unsigned long long
-	InfInt(std::string other); // std::string
-	InfInt(std::string other, int base); // std::string with base
-	// destructor //
-	virtual ~InfInt(void); // empty
-	// const getter //
+	InfInt(const InfInt& other); // copy
+	virtual ~InfInt(void) = default;
+
+	// from ints
+	InfInt(std::int8_t other);
+	InfInt(std::uint8_t other);
+	InfInt(std::int16_t other);
+	InfInt(std::uint16_t other);
+	InfInt(std::int32_t other);
+	InfInt(std::uint32_t other);
+	InfInt(std::int64_t other);
+	InfInt(std::uint64_t other);
+	template <typename T>
+	InfInt(const T& other);
+
+	// from strings
+	InfInt(std::string other);							// base 10
+	InfInt(std::string other, int base);				// custom base from 2 to 62
+	
 	bool sign(void) const;
 	bool get(const size_type& pos) const;
 	size_type size(void) const;
@@ -126,23 +134,61 @@ T InfInt::to_int_safe(void) const {
 
 // Outside the class //
 
-InfInt operator "" _infint(unsigned long long other); // alows the use of the macro _inf to transform a unsigned long long to an InfInt
+InfInt operator "" _infint(unsigned long long other); // alows the use of the macro _infint to transform a unsigned long long to an InfInt
 std::ostream& operator<<(std::ostream& out, const InfInt& infint);
 std::istream& operator>>(std::istream& in, InfInt& infint);
+
+namespace std {
+
+template<>
+class numeric_limits<InfInt> {
+public:
+	static constexpr bool is_specialized = true;
+	static constexpr bool is_signed = true;
+	static constexpr bool is_integer = true;
+	static constexpr bool is_exact = true;
+	static constexpr bool has_infinity = false;
+	static constexpr bool has_quiet_NaN = false;
+	static constexpr bool has_signaling_NaN = false;
+	static constexpr std::float_denorm_style has_denorm = std::denorm_absent;
+	static constexpr bool has_denorm_loss = false;
+	static constexpr std::float_round_style round_style = std::round_toward_zero;
+	static constexpr bool is_iec559 = false;
+	static constexpr bool is_bounded = false;
+	static constexpr bool is_modulo = false;
+	static constexpr int digits = std::numeric_limits<int>.max();
+	static constexpr int digits10 = std::numeric_limits<InfInt>::digits * std::log10(2);
+	static constexpr int max_digits10 = 0;
+	static constexpr int min_exponent = 0;
+	static constexpr int min_exponent10 = 0;
+	static constexpr int max_exponent = 0;
+	static constexpr int max_exponent10 = 0;
+	static constexpr bool traps = true;
+	static constexpr bool tinyness_before = false;
+};
+
+} // std namespace
 
 
 
 // InfInt libs
 #include "InfIntResult.hpp"
 
-InfInt::InfInt(void) :
-	m_number({ false }),
+InfInt::InfInt(void):
+	m_number({false}),
 	m_sign(false)
 {
 	//
 }
 
-InfInt::InfInt(char other) {
+InfInt::InfInt(const InfInt& other):
+	m_number(other.m_number),
+	m_sign(other.m_sign)
+{
+	//
+}
+
+InfInt(std::int8_t other) {
 	if (other >= 0) {
 		if (other == 0) {
 			this->m_sign = false;
@@ -170,11 +216,75 @@ InfInt::InfInt(char other) {
 	}
 }
 
-InfInt::InfInt(const InfInt& other) :
-	m_number(other.m_number),
-	m_sign(other.m_sign)
-{
+InfInt(std::uint8_t other) {
+	if (other == 0) {
+		this->m_sign = false;
+		this->m_number.push_back(false);
+		return;
+	}
+	this->m_sign = false;
+	while (other != 0) {
+		this->m_number.push_back(static_cast<bool>(other & 1));
+		other >>= 1;
+	}
+}
+
+InfInt(std::int16_t other) {
 	//
+}
+
+InfInt(std::uint16_t other) {
+	//
+}
+
+InfInt(std::int32_t other) {
+	//
+}
+
+InfInt(std::uint32_t other) {
+	//
+}
+
+InfInt(std::int64_t other) {
+	//
+}
+
+InfInt(std::uint64_t other) {
+	//
+}
+
+template <typename T>
+InfInt(const T& other) {
+	//
+}
+
+
+InfInt::InfInt(std::int8_t other) {
+	if (other >= 0) {
+		if (other == 0) {
+			this->m_sign = false;
+			this->m_number.push_back(false);
+			return;
+		}
+		this->m_sign = false;
+		while (other != 0) {
+			this->m_number.push_back(static_cast<bool>(other & 1));
+			other >>= 1;
+		}
+	} else {
+		if (other == -1) {
+			this->m_sign = true;
+			this->m_number.push_back(true);
+			return;
+		}
+		this->m_sign = true;
+		while (other != -1) {
+			this->m_number.push_back(static_cast<bool>(other & 1));
+			other >>= 1;
+		}
+		twos_complement();
+		*this += InfInt(128);
+	}
 }
 
 InfInt::InfInt(int other) {
@@ -351,10 +461,6 @@ InfInt::InfInt(std::string other, int base) {
 	this->clean();
 	if (sign)
 		this->twos_complement();
-}
-
-InfInt::~InfInt(void) {
-	//
 }
 
 bool InfInt::sign(void) const {

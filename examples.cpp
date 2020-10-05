@@ -27,9 +27,9 @@ int main(void) {
 	//exemple_prime();
 	//exemple_random();
 	//exemple_ratio();
-	exemple_rsa();
+	//exemple_rsa();
 
-	std::cout << std::endl << "/!\\ End /!\\" << std::endl;
+	std::cout << std::endl << "/!\\ End /!\\, press entrer to continue... "; std::cin.get();
 	return EXIT_SUCCESS;
 }
 
