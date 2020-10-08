@@ -22,12 +22,14 @@ void exemple_rsa(void);
 int main(void) {
 	std::cout << "/!\\ Start /!\\" << std::endl << std::endl;
 
-	//operators_tests();
-	//exemple_text();
-	//exemple_prime();
-	//exemple_random();
-	//exemple_ratio();
-	//exemple_rsa();
+	// comment out exemples you don't want to execute
+
+	operators_tests();
+	exemple_text();
+	exemple_prime();
+	exemple_random();
+	exemple_ratio();
+	exemple_rsa();
 
 	std::cout << std::endl << "/!\\ End /!\\, press entrer to continue... "; std::cin.get();
 	return EXIT_SUCCESS;

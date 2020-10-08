@@ -7,9 +7,9 @@
 #include <algorithm>
 #include <vector>
 #include <limits>
+#include <exception>
 
 // C std lib
-#include <cstdlib>
 #include <cmath>
 
 
@@ -22,19 +22,14 @@ public:
 	
 	InfInt(void); // init to +0
 	InfInt(const InfInt& other); // copy
+	InfInt(InfInt&& other); // move
 	virtual ~InfInt(void) = default;
 
 	// from ints
-	InfInt(std::int8_t other);
-	InfInt(std::uint8_t other);
-	InfInt(std::int16_t other);
-	InfInt(std::uint16_t other);
-	InfInt(std::int32_t other);
-	InfInt(std::uint32_t other);
-	InfInt(std::int64_t other);
-	InfInt(std::uint64_t other);
+	InfInt(int other);
+	InfInt(unsigned long long other);
 	template <typename T>
-	InfInt(const T& other);
+	InfInt(T other);
 
 	// from strings
 	InfInt(std::string other);							// base 10
@@ -156,7 +151,7 @@ public:
 	static constexpr bool is_iec559 = false;
 	static constexpr bool is_bounded = false;
 	static constexpr bool is_modulo = false;
-	static constexpr int digits = std::numeric_limits<int>.max();
+	static constexpr int digits = std::numeric_limits<int>::max();
 	static constexpr int digits10 = std::numeric_limits<InfInt>::digits * std::log10(2);
 	static constexpr int max_digits10 = 0;
 	static constexpr int min_exponent = 0;
@@ -188,103 +183,12 @@ InfInt::InfInt(const InfInt& other):
 	//
 }
 
-InfInt(std::int8_t other) {
-	if (other >= 0) {
-		if (other == 0) {
-			this->m_sign = false;
-			this->m_number.push_back(false);
-			return;
-		}
-		this->m_sign = false;
-		while (other != 0) {
-			this->m_number.push_back(static_cast<bool>(other & 1));
-			other >>= 1;
-		}
-	} else {
-		if (other == -1) {
-			this->m_sign = true;
-			this->m_number.push_back(true);
-			return;
-		}
-		this->m_sign = true;
-		while (other != -1) {
-			this->m_number.push_back(static_cast<bool>(other & 1));
-			other >>= 1;
-		}
-		twos_complement();
-		*this += InfInt(128);
-	}
-}
-
-InfInt(std::uint8_t other) {
-	if (other == 0) {
-		this->m_sign = false;
-		this->m_number.push_back(false);
-		return;
-	}
-	this->m_sign = false;
-	while (other != 0) {
-		this->m_number.push_back(static_cast<bool>(other & 1));
-		other >>= 1;
-	}
-}
-
-InfInt(std::int16_t other) {
-	//
-}
-
-InfInt(std::uint16_t other) {
-	//
-}
-
-InfInt(std::int32_t other) {
-	//
-}
-
-InfInt(std::uint32_t other) {
-	//
-}
-
-InfInt(std::int64_t other) {
-	//
-}
-
-InfInt(std::uint64_t other) {
-	//
-}
-
-template <typename T>
-InfInt(const T& other) {
-	//
-}
-
-
-InfInt::InfInt(std::int8_t other) {
-	if (other >= 0) {
-		if (other == 0) {
-			this->m_sign = false;
-			this->m_number.push_back(false);
-			return;
-		}
-		this->m_sign = false;
-		while (other != 0) {
-			this->m_number.push_back(static_cast<bool>(other & 1));
-			other >>= 1;
-		}
-	} else {
-		if (other == -1) {
-			this->m_sign = true;
-			this->m_number.push_back(true);
-			return;
-		}
-		this->m_sign = true;
-		while (other != -1) {
-			this->m_number.push_back(static_cast<bool>(other & 1));
-			other >>= 1;
-		}
-		twos_complement();
-		*this += InfInt(128);
-	}
+InfInt::InfInt(InfInt&& other):
+	m_number(std::move(other.m_number)),
+	m_sign(std::move(other.m_sign))
+{
+	other.m_number = {0};
+	other.m_sign = false;
 }
 
 InfInt::InfInt(int other) {
@@ -313,84 +217,6 @@ InfInt::InfInt(int other) {
 	}
 }
 
-InfInt::InfInt(unsigned int other) {
-	if (other == 0u) {
-		this->m_sign = false;
-		this->m_number.push_back(false);
-		return;
-	}
-	this->m_sign = false;
-	while (other != 0u) {
-		this->m_number.push_back(static_cast<bool>(other & 1u));
-		other >>= 1u;
-	}
-}
-
-InfInt::InfInt(long other) {
-	if (other >= 0l) {
-		if (other == 0l) {
-			this->m_sign = false;
-			this->m_number.push_back(false);
-			return;
-		}
-		this->m_sign = false;
-		while (other != 0l) {
-			this->m_number.push_back(static_cast<bool>(other & 1l));
-			other >>= 1l;
-		}
-	} else {
-		if (other == -1l) {
-			this->m_sign = true;
-			this->m_number.push_back(true);
-			return;
-		}
-		this->m_sign = true;
-		while (other != -1l) {
-			this->m_number.push_back(static_cast<bool>(other & 1l));
-			other >>= 1l;
-		}
-	}
-}
-
-InfInt::InfInt(unsigned long other) {
-	if (other == 0ul) {
-		this->m_sign = false;
-		this->m_number.push_back(false);
-		return;
-	}
-	this->m_sign = false;
-	while (other != 0ul) {
-		this->m_number.push_back(static_cast<bool>(other & 1ul));
-		other >>= 1ul;
-	}
-}
-
-InfInt::InfInt(long long other) {
-	if (other >= 0ll) {
-		if (other == 0ll) {
-			this->m_sign = false;
-			this->m_number.push_back(false);
-			return;
-		}
-		this->m_sign = false;
-		while (other != 0ll) {
-			this->m_number.push_back(static_cast<bool>(other & 1ll));
-			other >>= 1ll;
-		}
-	} else {
-		if (other == -1ll) {
-			this->m_sign = true;
-			this->m_number.push_back(true);
-			return;
-		}
-		this->m_sign = true;
-		while (other != -1ll) {
-			this->m_number.push_back(static_cast<bool>(other & 1ll));
-			other >>= 1ll;
-		}
-	}
-}
-
 InfInt::InfInt(unsigned long long other) {
 	if (other == 0ull) {
 		this->m_sign = false;
@@ -401,6 +227,36 @@ InfInt::InfInt(unsigned long long other) {
 	while (other != 0ull) {
 		this->m_number.push_back(static_cast<bool>(other & 1ull));
 		other >>= 1ull;
+	}
+}
+
+template <typename T>
+InfInt::InfInt(T other) {
+	static_assert(std::numeric_limits<T>::is_integer);
+	T zero = 0;
+	if (other >= zero) {
+		if (other == zero) {
+			this->m_sign = false;
+			this->m_number.push_back(false);
+			return;
+		}
+		this->m_sign = false;
+		while (other != zero) {
+			this->m_number.push_back(static_cast<bool>(other & 1));
+			other >>= 1;
+		}
+	} else {
+		T minus_one = -1;
+		if (other == minus_one) {
+			this->m_sign = true;
+			this->m_number.push_back(true);
+			return;
+		}
+		this->m_sign = true;
+		while (other != minus_one) {
+			this->m_number.push_back(static_cast<bool>(other & 1));
+			other >>= 1;
+		}
 	}
 }
 
@@ -427,7 +283,7 @@ InfInt::InfInt(std::string other) {
 
 InfInt::InfInt(std::string other, int base) {
 	if (base < 2 || base > 62)
-		throw std::invalid_argument("InfInt::InfInt(std::string other, int base): base must be beetween 2 and 62");
+		throw std::domain_error("InfInt::InfInt(std::string other, int base): base must be beetween 2 and 62");
 	if (other.empty()) {
 		this->m_sign = false;
 		this->m_number.push_back(false);
@@ -540,7 +396,7 @@ std::string InfInt::Bstr(size_type str_size) const {
 
 std::string InfInt::str(int base) const {
 	if (base < 2 || base > 62)
-		throw std::invalid_argument("std::string InfInt::str(int base) const: base must be beetween 2 and 62");
+		throw std::domain_error("std::string InfInt::str(int base) const: base must be beetween 2 and 62");
 	std::string str;
 	InfInt tmp(*this);
 	if (tmp == InfInt::zero)
@@ -577,10 +433,10 @@ std::string InfInt::str(void) const {
 		auto result = InfInt::fulldiv(tmp, powten);
 		tmp = result.quotient();
 		if (tmp == InfInt::zero) {
-			str = std::to_string(result.remainder().to_int<uint64_t>()) + str;
+			str = std::to_string(result.remainder().to_int<unsigned long long>()) + str;
 			break;
 		}
-		std::string tmpstr = std::to_string(result.remainder().to_int<uint64_t>());
+		std::string tmpstr = std::to_string(result.remainder().to_int<unsigned long long>());
 		InfInt::size_type tmpsize = size - tmpstr.size();
 		str = tmpstr + str;
 		tmpstr.clear();
@@ -596,7 +452,7 @@ std::string InfInt::str(void) const {
 
 InfIntFullDivResult InfInt::fulldiv(const InfInt& _a, const InfInt& _b) {
 	if (_b == InfInt::zero)
-		throw std::invalid_argument("static InfIntFulldivResult InfInt::fulldiv(const InfInt& _a, const InfInt& _b): Cannot divide by 0");
+		throw std::domain_error("static InfIntFulldivResult InfInt::fulldiv(const InfInt& _a, const InfInt& _b): Cannot divide by 0");
 
 	InfInt q;
 	InfInt a(_a);
@@ -804,7 +660,7 @@ InfInt& InfInt::operator*=(const InfInt& other) {
 
 InfInt InfInt::operator/(const InfInt& other) const {
 	if (other == InfInt::zero)
-		throw std::invalid_argument("InfInt InfInt::operator/(const InfInt& other) const: Cannot divide by 0");
+		throw std::domain_error("InfInt InfInt::operator/(const InfInt& other) const: Cannot divide by 0");
 
 	InfInt q;
 	InfInt a(*this);
@@ -851,7 +707,7 @@ InfInt& InfInt::operator/=(const InfInt& other) {
 
 InfInt InfInt::operator%(const InfInt& other) const {
 	if (other == InfInt::zero)
-		throw std::invalid_argument("InfInt InfInt::operator%(const InfInt& other) const: Cannot divide by 0");
+		throw std::domain_error("InfInt InfInt::operator%(const InfInt& other) const: Cannot divide by 0");
 
 	InfInt a(*this);
 	if (a.sign())
