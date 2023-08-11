@@ -1,9 +1,8 @@
 ## custom
 
-builds/
-makefile
-
-
+Makefile
+compile_flags.txt
+.gdb_history
 
 ## Windows: https://github.com/github/gitignore/blob/master/Global/Windows.gitignore
 

@@ -1,0 +1,14 @@
+repos:
+  - repo: local
+    hooks:
+    - id: clang-format-16
+      name: coding style
+      entry: clang-format-16 --Werror --dry-run
+      language: system
+      files: \.(c|h|cc|hh|hxx|cpp|hpp)$
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+    - id: forbid-binary
+    - id: markdownlint
+    - id: git-check
